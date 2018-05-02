@@ -1,0 +1,51 @@
+﻿<Window x:Class="WpfApp1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApp1"
+        xmlns:WPF="clr-namespace:InteractiveDataDisplay.WPF;assembly=InteractiveDataDisplay.WPF"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Window.Resources>
+        <Color x:Key="Button_DefaultColor">#FFDDDDDD</Color>
+    </Window.Resources>
+    <TabControl>
+        <TabItem Header="Spectrometer" Margin="-2,-2,0,0.2" HorizontalAlignment="Left" Width="180">
+            <DockPanel LastChildFill="True">
+                <GroupBox DockPanel.Dock="Right" Header="Controls"   Width="200" >
+                    <DockPanel LastChildFill="True">
+                        <GroupBox x:Name="dock" DockPanel.Dock="Top" Header="General" Height="200">
+                            <StackPanel >
+                                <TextBlock TextWrapping="Wrap" Text="Serial No."/>
+
+                                <TextBox x:Name="serialNoBox" Height="16" TextWrapping="Wrap" Text="0049010434" HorizontalContentAlignment="Center"/>
+                                <TextBlock TextWrapping="Wrap" Text="Int Time(s)"/>
+                                <TextBox x:Name="intTimeBox" Height="16" TextWrapping="Wrap" Text="0.1" HorizontalContentAlignment="Center"/>
+                                <Rectangle Fill="#FFF4F4F5" Height="8" Stroke="Black" Visibility="Hidden"/>
+                                <Button x:Name="connect_Button" Content="Connect" Height="30" Click="connect_Button_Click"/>
+                                <Rectangle Fill="#FFF4F4F5" Height="8" Stroke="Black" Visibility="Hidden"/>
+                                <Button x:Name="scan_Button" Content="Start/Stop" Height="30" Click="scan_Button_Click"/>
+                                <Rectangle Fill="#FFF4F4F5" Height="8" Stroke="Black" Visibility="Hidden"/>
+                                <Button x:Name="dispose_Button" Content="Dispose" Height="30" Click="dispose_Button_Click"/>
+
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox DockPanel.Dock="Bottom" Header="Status">
+                            <TextBlock x:Name="infoBox"  TextWrapping="Wrap" Text="CCS status will be shown here."/>
+                        </GroupBox>
+
+                    </DockPanel>
+                </GroupBox>
+                <GroupBox DockPanel.Dock="Right" Header="Monitor">
+                    <WPF:Chart>
+                        <WPF:LineGraph x:Name="lineGraph1" />
+                    </WPF:Chart>
+                </GroupBox>
+                <TextBlock Height="393.333333333333" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top"/>
+            </DockPanel>
+        </TabItem>
+        <TabItem Margin="-2.2,-2,2.2,0.2" Width="180" Header="Stepper Motor" HorizontalAlignment="Right"/>
+        <TabItem HorizontalAlignment="Right" Margin="-4,-2,4,0.2" Width="180" Header="Frogger"/>
+    </TabControl>
+</Window>
