@@ -42,10 +42,15 @@
                         <WPF:LineGraph x:Name="lineGraph1" />
                     </WPF:Chart>
                 </GroupBox>
-                <TextBlock Height="393.333333333333" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top"/>
             </DockPanel>
         </TabItem>
         <TabItem Margin="-2.2,-2,2.2,0.2" Width="180" Header="Stepper Motor" HorizontalAlignment="Right"/>
-        <TabItem HorizontalAlignment="Right" Margin="-4,-2,4,0.2" Width="180" Header="Frogger"/>
+        <TabItem HorizontalAlignment="Right" Margin="-4,-2,4,0.2" Width="180" Header="Frogger">
+            <DockPanel>
+                <GroupBox Header="Controls" Width="200" DockPanel.Dock="Right" HorizontalAlignment="Right"/>
+                <GroupBox Header="Info" Height="100" VerticalAlignment="Bottom"  DockPanel.Dock="Bottom"/>
+                <GroupBox Header="Heatmap" DockPanel.Dock="Top"/>
+            </DockPanel>
+        </TabItem>
     </TabControl>
 </Window>

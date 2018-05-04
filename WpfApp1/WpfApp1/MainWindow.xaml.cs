@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using System.Windows.Media;
-using Thorlabs.CCS_Series;
+using Thorlabs.ccs.interop64;
 
 
 namespace WpfApp1
@@ -71,7 +70,6 @@ namespace WpfApp1
                 //TODO:测试定时器代码
                 Action action = new Action(PlotLineGraph);
                 scanTimer.Dispatcher.BeginInvoke(DispatcherPriority.Loaded,action);
-                //PlotLineGraph();
             }
         }
 
@@ -151,7 +149,7 @@ namespace WpfApp1
         {
             if (ccsSeries == null)
             {
-                //MessageBox.Show("No CCS connected");
+                MessageBox.Show("No CCS connected");
                 //TODO:测试定时器
                 if (scanTimer.IsEnabled)
                 {
