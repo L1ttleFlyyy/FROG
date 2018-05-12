@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         xmlns:WPF="clr-namespace:InteractiveDataDisplay.WPF;assembly=InteractiveDataDisplay.WPF"
-        mc:Ignorable="d" Height="450" Width="800" Title="FROG" WindowState="Maximized">
+        mc:Ignorable="d" Height="450" Width="800" Title="FROG" WindowState="Maximized" Closed="Window_Closed" Loaded="Window_Loaded">
     <TabControl TabStripPlacement="Bottom">
         <TabItem Header="Spectrometer" Margin="0,0,0,0" HorizontalAlignment="Left" Width="180" Height="40">
             <DockPanel LastChildFill="True">
@@ -41,12 +41,34 @@
                 </GroupBox>
             </DockPanel>
         </TabItem>
-        <TabItem Margin="0,0,0,0" Width="180" Header="Stepper Motor" HorizontalAlignment="Left"/>
+        <TabItem Margin="0,0,0,0" Width="180" Header="Stepper Motor" HorizontalAlignment="Left">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <!--text and combobox to select the device to be shown-->
+                <StackPanel Orientation="Horizontal" Grid.Row="0" >
+                    <Button x:Name="KDC_Button" Width="200" Click="Button_Click" Content="Scan Motors" />
+                    <TextBlock Text="Devices" Margin="5"/>
+                    <ComboBox Name="_devices" SelectionChanged="_devices_OnSelectionChanged"/>
+                </StackPanel>
+                <!--ContentControl which will display the device UserInterface-->
+                <ContentControl Name="_contentControl" Margin="5" Grid.Row="1"/>
+            </Grid>
+        </TabItem>
         <TabItem HorizontalAlignment="Left" Margin="0,0,0,0" Width="180" Header="Frogger">
             <DockPanel>
-                <GroupBox Header="Controls" Width="200" DockPanel.Dock="Right" HorizontalAlignment="Right"/>
-                <GroupBox Header="Info" Height="100" VerticalAlignment="Bottom"  DockPanel.Dock="Bottom"/>
-                <GroupBox Header="Heatmap" DockPanel.Dock="Top">
+                <GroupBox Header="Controls" Width="300" DockPanel.Dock="Right" HorizontalAlignment="Right">
+                    <DockPanel>
+                        <GroupBox Header="GroupBox" Height="120" VerticalAlignment="Top" DockPanel.Dock="Bottom"/>
+                        <WPF:Chart DockPanel.Dock="Top">
+                            <WPF:LineGraph x:Name="lineGraph2"/>
+                        </WPF:Chart>
+                    </DockPanel>
+                </GroupBox>
+                <GroupBox Header="Info" Height="150" VerticalAlignment="Bottom"  DockPanel.Dock="Bottom"/>
+                <GroupBox Header="Graph" DockPanel.Dock="Top">
                     <WPF:Chart>
                         <WPF:HeatmapGraph x:Name="heatMap1"/>
                     </WPF:Chart>
