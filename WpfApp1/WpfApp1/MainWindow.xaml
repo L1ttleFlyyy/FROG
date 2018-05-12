@@ -5,13 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         xmlns:WPF="clr-namespace:InteractiveDataDisplay.WPF;assembly=InteractiveDataDisplay.WPF"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Window.Resources>
-        <Color x:Key="Button_DefaultColor">#FFDDDDDD</Color>
-    </Window.Resources>
-    <TabControl>
-        <TabItem Header="Spectrometer" Margin="-2,-2,0,0.2" HorizontalAlignment="Left" Width="180">
+        mc:Ignorable="d" Height="450" Width="800" Title="FROG" WindowState="Maximized">
+    <TabControl TabStripPlacement="Bottom">
+        <TabItem Header="Spectrometer" Margin="0,0,0,0" HorizontalAlignment="Left" Width="180" Height="40">
             <DockPanel LastChildFill="True">
                 <GroupBox DockPanel.Dock="Right" Header="Controls"   Width="200" >
                     <DockPanel LastChildFill="True">
@@ -19,7 +15,7 @@
                             <StackPanel >
                                 <TextBlock TextWrapping="Wrap" Text="Serial No."/>
 
-                                <TextBox x:Name="serialNoBox" Height="16" TextWrapping="Wrap" Text="0049010434" HorizontalContentAlignment="Center"/>
+                                <TextBox x:Name="serialNoBox" Height="16" TextWrapping="Wrap" Text="00419934" HorizontalContentAlignment="Center"/>
                                 <TextBlock TextWrapping="Wrap" Text="Int Time(s)"/>
                                 <TextBox x:Name="intTimeBox" Height="16" TextWrapping="Wrap" Text="0.1" HorizontalContentAlignment="Center"/>
                                 <Rectangle Fill="#FFF4F4F5" Height="8" Stroke="Black" Visibility="Hidden"/>
@@ -38,18 +34,23 @@
                     </DockPanel>
                 </GroupBox>
                 <GroupBox DockPanel.Dock="Right" Header="Monitor">
-                    <WPF:Chart>
-                        <WPF:LineGraph x:Name="lineGraph1" />
+                    <WPF:Chart x:Name="chart1">
+                        <WPF:LineGraph x:Name="lineGraph1" IsAutoFitEnabled="True" >
+                        </WPF:LineGraph>
                     </WPF:Chart>
                 </GroupBox>
             </DockPanel>
         </TabItem>
-        <TabItem Margin="-2.2,-2,2.2,0.2" Width="180" Header="Stepper Motor" HorizontalAlignment="Right"/>
-        <TabItem HorizontalAlignment="Right" Margin="-4,-2,4,0.2" Width="180" Header="Frogger">
+        <TabItem Margin="0,0,0,0" Width="180" Header="Stepper Motor" HorizontalAlignment="Left"/>
+        <TabItem HorizontalAlignment="Left" Margin="0,0,0,0" Width="180" Header="Frogger">
             <DockPanel>
                 <GroupBox Header="Controls" Width="200" DockPanel.Dock="Right" HorizontalAlignment="Right"/>
                 <GroupBox Header="Info" Height="100" VerticalAlignment="Bottom"  DockPanel.Dock="Bottom"/>
-                <GroupBox Header="Heatmap" DockPanel.Dock="Top"/>
+                <GroupBox Header="Heatmap" DockPanel.Dock="Top">
+                    <WPF:Chart>
+                        <WPF:HeatmapGraph x:Name="heatMap1"/>
+                    </WPF:Chart>
+                </GroupBox>
             </DockPanel>
         </TabItem>
     </TabControl>

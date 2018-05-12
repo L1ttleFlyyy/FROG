@@ -34,8 +34,8 @@ namespace WpfApp1
         public MainWindow()
         {
             InitializeComponent();
-            //PlotLineGraph();
             scanTimer.Tick += new EventHandler(timerScanFun);
+            PlotHeatMap();
         }
 
         private void timerScanFun(object sender, EventArgs e)
@@ -47,11 +47,17 @@ namespace WpfApp1
                     int res = ccsSeries.getDeviceStatus(out int status);
                     switch (status)
                     {
-                        case 37:
-                            res = ccsSeries.getScanData(spectrumdata);
-                            break;
                         case 1:
-                            res = ccsSeries.startScan();
+                            Action action = new Action(PlotLineGraph);
+                            scanTimer.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, action);
+                            break;
+                        case 5:
+                        case 277:
+                        case 17:
+                        case 21:
+                        case 35:
+                            Func<int> func = new Func<int>(ccsSeries.startScan);
+                            scanTimer.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, func);
                             break;
                         default:
                             scanTimer.Stop();
@@ -68,25 +74,43 @@ namespace WpfApp1
             else
             {
                 //TODO:测试定时器代码
-                Action action = new Action(PlotLineGraph);
-                scanTimer.Dispatcher.BeginInvoke(DispatcherPriority.Loaded,action);
+                scanTimer.Stop();
+                MessageBox.Show("No CCS connected");
             }
         }
 
+        private void PlotHeatMap()
+        {
+            int N = 127;
+            int M = 127;
+
+            double[] x = new double[M+1];
+            double[] y = new double[N+1];
+            double[,] f = new double[M,N];
+            double phase = 0;
+
+            // Coordinate grid is constant
+            for (int i = 0; i <= N; i++)
+                x[i] = -Math.PI + 2 * i * Math.PI / N;
+
+            for (int j = 0; j <= M; j++)
+                y[j] = -Math.PI / 2 + j * Math.PI / M;
+
+
+            // Data array is updated
+            for (int i = 0; i < N; i++)
+                for (int j = 0; j < M; j++)
+                    f[i, j] = Math.Sqrt(x[i] * x[i] + y[j] * y[j]) * Math.Abs(Math.Cos(x[i] * x[i] + y[j] * y[j] + phase));
+
+            long mapid = heatMap1.Plot(f, x, y);
+
+        }
 
         private void PlotLineGraph()
         {
-            var x = (double[])wavelength.Clone();
-            var y = (double[])spectrumdata.Clone();
-
-            for (int i=0;i<3648;i++)
-            {
-                x[i] = i+1;
-                y[i] = randomtest.NextDouble();
-            }
-
-            lineGraph1.Plot(x, y);
-
+            int res = ccsSeries.getScanData(spectrumdata);
+            lineGraph1.Plot(wavelength, spectrumdata);
+            
         }
 
         private void dispose_Button_Click(object sender, RoutedEventArgs e)
@@ -97,6 +121,10 @@ namespace WpfApp1
                 try
                 {
                     ccsSeries.Dispose();
+                    ccsSeries = null;
+                    scanTimer.Stop();
+                    scan_Button.Background = connect_Button.Background.Clone();
+                    infoBox.Text = string.Empty;
                 }
                 catch (Exception err)
                 {
@@ -140,7 +168,7 @@ namespace WpfApp1
             }
             catch (Exception err)
             {
-                MessageBox.Show("Connected failed" + err.ToString());
+                MessageBox.Show("Connected failed\n" + err.ToString());
             }
             Cursor = Cursors.Arrow;
         }
@@ -150,18 +178,6 @@ namespace WpfApp1
             if (ccsSeries == null)
             {
                 MessageBox.Show("No CCS connected");
-                //TODO:测试定时器
-                if (scanTimer.IsEnabled)
-                {
-                    scan_Button.Background = connect_Button.Background.Clone();
-                    scanTimer.Stop();
-                }
-                else
-                {
-                    scanTimer.Interval = TimeSpan.FromMilliseconds(1000*double.Parse(intTimeBox.Text));
-                    scan_Button.Background = new SolidColorBrush(SystemColors.ActiveCaptionColor);
-                    scanTimer.Start();
-                }
             }
             else
             {
@@ -175,7 +191,7 @@ namespace WpfApp1
                     double intTime = double.Parse(intTimeBox.Text);
                     scanTimer.Interval = TimeSpan.FromMilliseconds(1000*intTime);
                     int res = ccsSeries.setIntegrationTime(intTime);
-                    scan_Button.Background = new SolidColorBrush(SystemColors.ActiveCaptionColor);
+                    scan_Button.Background = new SolidColorBrush(SystemColors.HighlightColor);
                     scanTimer.Start();
                 }
             }
