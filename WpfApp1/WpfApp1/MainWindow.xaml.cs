@@ -21,11 +21,15 @@ namespace WpfApp1
 
         private TLCCS ccsSeries;
 
+        bool dataReady = false;
+
         private DispatcherTimer scanTimer = new DispatcherTimer();
 
         private double[] wavelength = new double[3648];
+        private double[] simpleWav = new double[365];
 
         private double[] spectrumdata = new double[3648];
+        private double[] simpleData = new double[365];
 
         private double minWave, maxWave;  
 
@@ -33,7 +37,6 @@ namespace WpfApp1
         {
             InitializeComponent();
             scanTimer.Tick += new EventHandler(timerScanFun);
-            CompositionTarget.Rendering += new EventHandler(UpdateSpectrum);
             PlotHeatMap();
         }
 
@@ -81,13 +84,16 @@ namespace WpfApp1
         private void getData()
         {
             int res =ccsSeries.getScanData(spectrumdata);
+            simpleData = DataSimplify(spectrumdata);
+            dataReady = true;
         }
 
         private void UpdateSpectrum(object sender, EventArgs e)
         {
-            if (scanTimer.IsEnabled)
+            if (dataReady)
             {
-                lineGraph1.Plot(wavelength, spectrumdata);
+                lineGraph1.Plot(simpleWav, simpleData);
+                dataReady = false;
             }
         }
 
@@ -108,9 +114,14 @@ namespace WpfApp1
                 }
                 finally
                 {
-                    scanTimer.Stop();
+                    if (scanTimer.IsEnabled)
+                    {
+                        CompositionTarget.Rendering -= new EventHandler(UpdateSpectrum);
+                        scanTimer.Stop();
+                    }
                     scan_Button.Background = connect_Button.Background.Clone();
                     infoBox.Text = string.Empty;
+                    
                 }
             }
             else
@@ -146,13 +157,17 @@ namespace WpfApp1
                     ccsSeries = new TLCCS(resourceName, false, false);
                 }
                 int res = ccsSeries.getWavelengthData((short)0, wavelength, out minWave, out maxWave);
+                simpleWav = DataSimplify(wavelength);
                 DeviceInformation();
             }
             catch (Exception err)
             {
                 MessageBox.Show("Connected failed\n" + err.ToString());
             }
-            Cursor = Cursors.Arrow;
+            finally
+            {
+                Cursor = Cursors.Arrow;
+            }
         }
 
         private void scan_Button_Click(object sender, RoutedEventArgs e)
@@ -167,9 +182,11 @@ namespace WpfApp1
                 {
                     scanTimer.Stop();
                     scan_Button.Background = connect_Button.Background.Clone();
+                    CompositionTarget.Rendering -= new EventHandler(UpdateSpectrum);
                 }
                 else
                 {
+                    CompositionTarget.Rendering += new EventHandler(UpdateSpectrum);
                     double intTime = double.Parse(intTimeBox.Text);
                     scanTimer.Interval = TimeSpan.FromMilliseconds(1000*intTime);
                     int res = ccsSeries.setIntegrationTime(intTime);
@@ -195,6 +212,18 @@ namespace WpfApp1
                 + $"Firmware: {firmware.ToString()}\n"
                 + $"Driver: {driver.ToString()}\n"
                 + $"Status: {status.ToString()}";
+        }
+
+        private double[] DataSimplify(double[] data)
+        {
+            double[] simdata = new double[365];
+
+            for (int i=0; i<365;i++)
+            {
+                simdata[i] = data [10*i];
+            }
+
+            return simdata;
         }
 
 

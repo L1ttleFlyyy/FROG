@@ -52,6 +52,7 @@ namespace WpfApp1
             // create the device
             ConnectDevice(serialNo);
 
+            motorNO=serialNo;
 
         }
 
@@ -122,8 +123,16 @@ namespace WpfApp1
         {
             if ((_genericDevice != null) && _genericDevice.CoreDevice.IsConnected)
             {
+                _genericDevice.CoreDevice.Disconnect(false);
                 _genericDevice = null;
             }
+
+            if (KDC101 !=null && KDC101.IsConnected)
+            {
+                KDC101.Disconnect(false);
+                KDC101 = null;
+            }
+
         }
     }
 }

@@ -107,11 +107,20 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="Thorlabs.ccs.interop64, Version=0.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\SharedLibraries\Thorlabs.ccs.interop64.dll</HintPath>
+    </Reference>
     <Reference Include="Thorlabs.MotionControl.DeviceManagerCLI">
       <HintPath>..\SharedLibraries\Thorlabs.MotionControl.DeviceManagerCLI.dll</HintPath>
     </Reference>
     <Reference Include="Thorlabs.MotionControl.DeviceManagerUI">
       <HintPath>..\SharedLibraries\Thorlabs.MotionControl.DeviceManagerUI.dll</HintPath>
+    </Reference>
+    <Reference Include="Thorlabs.MotionControl.GenericMotorCLI, Version=1.14.7.31372, Culture=neutral, PublicKeyToken=c7ec6d6d6e2435e7" />
+    <Reference Include="ThorLabs.MotionControl.KCube.DCServoCLI, Version=1.14.7.32143, Culture=neutral, PublicKeyToken=c7ec6d6d6e2435e7, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\SharedLibraries\ThorLabs.MotionControl.KCube.DCServoCLI.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
@@ -124,7 +133,6 @@
     </ApplicationDefinition>
     <Compile Include="FroggerTab.cs" />
     <Compile Include="StepperTab.cs" />
-    <Compile Include="TLCCS.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

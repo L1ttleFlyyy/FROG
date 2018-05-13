@@ -61,16 +61,24 @@
             <DockPanel>
                 <GroupBox Header="Controls" Width="300" DockPanel.Dock="Right" HorizontalAlignment="Right">
                     <DockPanel>
-                        <GroupBox Header="GroupBox" Height="120" VerticalAlignment="Top" DockPanel.Dock="Bottom"/>
+                        <GroupBox Height="120" VerticalAlignment="Top" DockPanel.Dock="Bottom">
+                            <DockPanel LastChildFill="False">
+                                <Button x:Name="singleButton" Content="Single" Height="105" VerticalAlignment="Center" Width="75" HorizontalAlignment="Center" Click="singleButton_Click"/>
+                                <Button x:Name="continuousButton" Content="Continuous" Height="105" VerticalAlignment="Center" Width="75" HorizontalAlignment="Center" Margin="28,0,0,0" Click="continuousButton_Click"/>
+                                <Button x:Name="forcestopButton" Content="Force Stop" Height="105" VerticalAlignment="Center" Width="75" DockPanel.Dock="Right" Click="forcestopButton_Click"/>
+                            </DockPanel>
+                        </GroupBox>
                         <WPF:Chart DockPanel.Dock="Top">
-                            <WPF:LineGraph x:Name="lineGraph2"/>
+                            <WPF:HeatmapGraph x:Name="heatMap1"/>
                         </WPF:Chart>
                     </DockPanel>
                 </GroupBox>
-                <GroupBox Header="Info" Height="150" VerticalAlignment="Bottom"  DockPanel.Dock="Bottom"/>
+                <GroupBox Header="Info" Height="150" VerticalAlignment="Bottom"  DockPanel.Dock="Bottom">
+                    <TextBox x:Name="infoTextBox" TextWrapping="Wrap" Text="TextBox"/>
+                </GroupBox>
                 <GroupBox Header="Graph" DockPanel.Dock="Top">
                     <WPF:Chart>
-                        <WPF:HeatmapGraph x:Name="heatMap1"/>
+                        <WPF:LineGraph x:Name="lineGraph2"/>
                     </WPF:Chart>
                 </GroupBox>
             </DockPanel>
