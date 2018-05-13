@@ -107,10 +107,6 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="Thorlabs.ccs.interop64, Version=0.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Microsoft.NET\Primary Interop Assemblies\Thorlabs.ccs.interop64.dll</HintPath>
-    </Reference>
     <Reference Include="Thorlabs.MotionControl.DeviceManagerCLI">
       <HintPath>..\SharedLibraries\Thorlabs.MotionControl.DeviceManagerCLI.dll</HintPath>
     </Reference>
@@ -127,6 +123,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="StepperTab.cs" />
+    <Compile Include="TLCCS.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
