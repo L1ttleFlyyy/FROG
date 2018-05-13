@@ -27,14 +27,13 @@ namespace WpfApp1
 
         private double[] spectrumdata = new double[3648];
 
-        private double minWave, maxWave;
-
-        private Random randomtest = new Random();   
+        private double minWave, maxWave;  
 
         public MainWindow()
         {
             InitializeComponent();
             scanTimer.Tick += new EventHandler(timerScanFun);
+            CompositionTarget.Rendering += new EventHandler(UpdateSpectrum);
             PlotHeatMap();
         }
 
@@ -48,7 +47,7 @@ namespace WpfApp1
                     switch (status)
                     {
                         case 1:
-                            Action action = new Action(PlotLineGraph);
+                            Action action = new Action(getData);
                             scanTimer.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, action);
                             break;
                         case 5:
@@ -79,38 +78,17 @@ namespace WpfApp1
             }
         }
 
-        private void PlotHeatMap()
+        private void getData()
         {
-            int N = 127;
-            int M = 127;
-
-            double[] x = new double[M+1];
-            double[] y = new double[N+1];
-            double[,] f = new double[M,N];
-            double phase = 0;
-
-            // Coordinate grid is constant
-            for (int i = 0; i <= N; i++)
-                x[i] = -Math.PI + 2 * i * Math.PI / N;
-
-            for (int j = 0; j <= M; j++)
-                y[j] = -Math.PI / 2 + j * Math.PI / M;
-
-
-            // Data array is updated
-            for (int i = 0; i < N; i++)
-                for (int j = 0; j < M; j++)
-                    f[i, j] = Math.Sqrt(x[i] * x[i] + y[j] * y[j]) * Math.Abs(Math.Cos(x[i] * x[i] + y[j] * y[j] + phase));
-
-            long mapid = heatMap1.Plot(f, x, y);
-
+            int res =ccsSeries.getScanData(spectrumdata);
         }
 
-        private void PlotLineGraph()
+        private void UpdateSpectrum(object sender, EventArgs e)
         {
-            int res = ccsSeries.getScanData(spectrumdata);
-            lineGraph1.Plot(wavelength, spectrumdata);
-            
+            if (scanTimer.IsEnabled)
+            {
+                lineGraph1.Plot(wavelength, spectrumdata);
+            }
         }
 
         private void dispose_Button_Click(object sender, RoutedEventArgs e)
@@ -122,13 +100,17 @@ namespace WpfApp1
                 {
                     ccsSeries.Dispose();
                     ccsSeries = null;
-                    scanTimer.Stop();
-                    scan_Button.Background = connect_Button.Background.Clone();
-                    infoBox.Text = string.Empty;
+
                 }
                 catch (Exception err)
                 {
                     MessageBox.Show("Can't release CCS" + err.ToString());
+                }
+                finally
+                {
+                    scanTimer.Stop();
+                    scan_Button.Background = connect_Button.Background.Clone();
+                    infoBox.Text = string.Empty;
                 }
             }
             else
