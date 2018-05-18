@@ -122,6 +122,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\SharedLibraries\ThorLabs.MotionControl.KCube.DCServoCLI.dll</HintPath>
     </Reference>
+    <Reference Include="Thorlabs.MotionControl.KCube.DCServoUI, Version=1.14.7.0, Culture=neutral, PublicKeyToken=c7ec6d6d6e2435e7, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\SharedLibraries\Thorlabs.MotionControl.KCube.DCServoUI.dll</HintPath>
+    </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />

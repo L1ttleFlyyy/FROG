@@ -4,32 +4,38 @@ using System.IO;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Thorlabs.MotionControl.DeviceManagerCLI;
 using Thorlabs.MotionControl.DeviceManagerUI;
-
+using Thorlabs.MotionControl.KCube.DCServoCLI;
+using Thorlabs.MotionControl.KCube.DCServoUI;
 
 namespace WpfApp1
 {
     public partial class MainWindow : Window
     {
-        private GenericDeviceHolder.GenericDevice _genericDevice;
+        //private GenericDeviceHolder.GenericDevice _genericDevice;
 
         private void Window_Closed(object sender, EventArgs e)
         {
             // disconnect any connected device
             DisconnectDevice();
-            // unregister devices before exit
-            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            DeviceManager.UnregisterLibrary(null, Path.Combine(path, "Thorlabs.MotionControl.KCube.DCServoUI.DLL"), "KCubeDCServoUI");
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //TODO:window on loading
+            connectCCS();
+            connectKDC();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            connectKDC();
+        }
+
+        private void connectKDC()
+        {
+            Cursor = Cursors.Wait;
             string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             DeviceManager.RegisterLibrary(null, Path.Combine(path, "Thorlabs.MotionControl.KCube.DCServoUI.DLL"), "KCubeDCServoUI");
 
@@ -40,6 +46,7 @@ namespace WpfApp1
             if (devices.Count == 0)
             {
                 MessageBox.Show("No Devices");
+                Cursor = Cursors.Arrow;
                 return;
             }
 
@@ -48,57 +55,44 @@ namespace WpfApp1
             _devices.SelectedIndex = 0;
 
             // get first serial number for example
-            string serialNo = devices[0];
+            motorNO = devices[0];
             // create the device
-            ConnectDevice(serialNo);
-
-            motorNO=serialNo;
-
+            ConnectDevice(motorNO);
+            Cursor = Cursors.Arrow;
         }
 
         private void _devices_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // get the serial number from the combobox
-            string serialNo = _devices.SelectedItem as string;
-            if (_genericDevice != null && _genericDevice.CoreDevice.DeviceID == serialNo)
+            string motorNO = _devices.SelectedItem as string;
+            if (KDC101 != null && KDC101.DeviceID == motorNO)
             {
                 // the device is already connected so leave it alone
                 return;
             }
 
             // connect the device
-            ConnectDevice(serialNo);
+            ConnectDevice(motorNO);
         }
 
-        private void ConnectDevice(string serialNo)
+        private void ConnectDevice(string motorNO)
         {
             // unload any currently connected device if not of the desired type
-            if (_genericDevice != null)
+            if (KDC101 != null)
             {
-                if (_genericDevice.CoreDevice.DeviceID == serialNo)
+                if (KDC101.DeviceID == motorNO)
                 {
                     return;
                 }
                 DisconnectDevice();
             }
 
-            // create the new device anonymously
-            IGenericCoreDeviceCLI device = DeviceFactory.CreateDevice(serialNo);
-            // create a generic device holder to hold the device
-            GenericDeviceHolder devices = new GenericDeviceHolder(device);
-            // NOTE channel 1 is always available as TCubes are treated as Single Channel devices
-            // For Benchtops, check that the channel exists before accessing it;
-            _genericDevice = devices[1];
-            if (_genericDevice == null)
-            {
-                MessageBox.Show("Unknown Device Type");
-                return;
-            }
+            // create the new device
+            KDC101 = KCubeDCServo.CreateKCubeDCServo(motorNO);
 
-            // connect the device by accessing the core device functions
             try
             {
-                _genericDevice.CoreDevice.Connect(serialNo);
+                KDC101.Connect(motorNO);
 
             }
             catch (Exception err)
@@ -108,30 +102,23 @@ namespace WpfApp1
             }
 
             // wait for settings to be initialized (on the channel)
-            _genericDevice.Device.WaitForSettingsInitialized(5000);
-
+            KDC101.WaitForSettingsInitialized(5000);
+            
             // create user interface (WPF view) via the DeviceManager
-            IUIFactory factory = DeviceManager.GetUIFactory(_genericDevice.CoreDevice.DeviceID);
-            IDeviceViewModel viewModel = factory.CreateViewModel(DisplayTypeEnum.Full, _genericDevice);
-            viewModel.Initialize(DeviceConfiguration.DeviceSettingsUseOptionType.UseConfiguredSettings);
+            _contentControl.Content = KCubeDCServoUI.CreateLargeView(KDC101,DeviceConfiguration.DeviceSettingsUseOptionType.UseConfiguredSettings);
 
-            // bind the view using the UI factory and attach it to our display
-            _contentControl.Content = factory.CreateLargeView(viewModel);
         }
 
         private void DisconnectDevice()
         {
-            if ((_genericDevice != null) && _genericDevice.CoreDevice.IsConnected)
-            {
-                _genericDevice.CoreDevice.Disconnect(false);
-                _genericDevice = null;
-            }
-
             if (KDC101 !=null && KDC101.IsConnected)
             {
                 KDC101.Disconnect(false);
                 KDC101 = null;
             }
+            // unregister devices before exit
+            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            DeviceManager.UnregisterLibrary(null, Path.Combine(path, "Thorlabs.MotionControl.KCube.DCServoUI.DLL"), "KCubeDCServoUI");
 
         }
     }

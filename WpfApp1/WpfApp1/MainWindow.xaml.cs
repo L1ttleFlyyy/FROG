@@ -4,7 +4,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using System.Windows.Media;
 using Thorlabs.ccs.interop64;
-
+using System.Threading.Tasks;
 
 namespace WpfApp1
 {
@@ -31,14 +31,17 @@ namespace WpfApp1
         private double[] spectrumdata = new double[3648];
         private double[] simpleData = new double[365];
 
-        private double minWave, maxWave;  
+        private double minWave, maxWave;
 
         public MainWindow()
         {
             InitializeComponent();
             scanTimer.Tick += new EventHandler(timerScanFun);
-            PlotHeatMap();
+
         }
+
+        private Task timerTask1;
+        private Task timerTask2;
 
         private void timerScanFun(object sender, EventArgs e)
         {
@@ -50,16 +53,32 @@ namespace WpfApp1
                     switch (status)
                     {
                         case 1:
-                            Action action = new Action(getData);
-                            scanTimer.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, action);
+                            if (timerTask1==null)
+                            {
+                                timerTask1 = new Task(GetData);
+                                timerTask1.Start();
+                            }
+                            else if(timerTask1.IsCompleted)
+                            {
+                                timerTask1 = new Task(GetData);
+                                timerTask1.Start();
+                            }
                             break;
                         case 5:
                         case 277:
-                        case 17:
                         case 21:
                         case 35:
-                            Func<int> func = new Func<int>(ccsSeries.startScan);
-                            scanTimer.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, func);
+                        case 17:
+                            if (timerTask2 == null)
+                            {
+                                timerTask2 = new Task(()=>ccsSeries.startScan());
+                                timerTask2.Start();
+                            }
+                            else if (timerTask2.IsCompleted)
+                            {
+                                timerTask2 = new Task(() => ccsSeries.startScan());
+                                timerTask2.Start();
+                            }
                             break;
                         default:
                             scanTimer.Stop();
@@ -75,27 +94,27 @@ namespace WpfApp1
             }
             else
             {
-                //TODO:测试定时器代码
                 scanTimer.Stop();
                 MessageBox.Show("No CCS connected");
             }
         }
 
-        private void getData()
+        private void GetData()
         {
-            int res =ccsSeries.getScanData(spectrumdata);
-            simpleData = DataSimplify(spectrumdata);
-            dataReady = true;
+            int res = ccsSeries.getScanData(spectrumdata);
+            //simpleData = DataSimplify(spectrumdata);
+            lineGraph1.Dispatcher.BeginInvoke(new Action(()=>lineGraph1.Plot(wavelength, spectrumdata)));
+            //dataReady = true;
         }
 
-        private void UpdateSpectrum(object sender, EventArgs e)
-        {
-            if (dataReady)
-            {
-                lineGraph1.Plot(simpleWav, simpleData);
-                dataReady = false;
-            }
-        }
+        //private void UpdateSpectrum(object sender, EventArgs e)
+        //{
+        //    if (dataReady)
+        //    {
+        //        lineGraph1.Plot(simpleWav, simpleData);
+        //        dataReady = false;
+        //    }
+        //}
 
         private void dispose_Button_Click(object sender, RoutedEventArgs e)
         {
@@ -116,22 +135,29 @@ namespace WpfApp1
                 {
                     if (scanTimer.IsEnabled)
                     {
-                        CompositionTarget.Rendering -= new EventHandler(UpdateSpectrum);
+                        //CompositionTarget.Rendering -= new EventHandler(UpdateSpectrum);
                         scanTimer.Stop();
                     }
                     scan_Button.Background = connect_Button.Background.Clone();
                     infoBox.Text = string.Empty;
-                    
+
                 }
             }
             else
             {
                 MessageBox.Show("No CCS connected!");
             }
+        }
+
+
+
+        private void connect_Button_Click(object sender, RoutedEventArgs e)
+        {
+            connectCCS();
 
         }
 
-        private void connect_Button_Click(object sender, RoutedEventArgs e)
+        private void connectCCS()
         {
             if (serialNoBox.Text.Length == 0)
             {
@@ -155,10 +181,10 @@ namespace WpfApp1
                     string resourceName = "USB0::0x1313::" + instrumentNumber + "::M" + serialNoBox.Text.ToString() + "::RAW";
                     // initialize device with the resource name (be sure the device is still connected)
                     ccsSeries = new TLCCS(resourceName, false, false);
+                    int res = ccsSeries.getWavelengthData((short)0, wavelength, out minWave, out maxWave);
+                    simpleWav = DataSimplify(wavelength);
+                    DeviceInformation();
                 }
-                int res = ccsSeries.getWavelengthData((short)0, wavelength, out minWave, out maxWave);
-                simpleWav = DataSimplify(wavelength);
-                DeviceInformation();
             }
             catch (Exception err)
             {
@@ -182,13 +208,13 @@ namespace WpfApp1
                 {
                     scanTimer.Stop();
                     scan_Button.Background = connect_Button.Background.Clone();
-                    CompositionTarget.Rendering -= new EventHandler(UpdateSpectrum);
+                    //CompositionTarget.Rendering -= new EventHandler(UpdateSpectrum);
                 }
                 else
                 {
-                    CompositionTarget.Rendering += new EventHandler(UpdateSpectrum);
+                    //CompositionTarget.Rendering += new EventHandler(UpdateSpectrum);
                     double intTime = double.Parse(intTimeBox.Text);
-                    scanTimer.Interval = TimeSpan.FromMilliseconds(1000*intTime);
+                    scanTimer.Interval = TimeSpan.FromMilliseconds(1000 * intTime);
                     int res = ccsSeries.setIntegrationTime(intTime);
                     scan_Button.Background = new SolidColorBrush(SystemColors.HighlightColor);
                     scanTimer.Start();
@@ -218,9 +244,9 @@ namespace WpfApp1
         {
             double[] simdata = new double[365];
 
-            for (int i=0; i<365;i++)
+            for (int i = 0; i < 365; i++)
             {
-                simdata[i] = data [10*i];
+                simdata[i] = data[10 * i];
             }
 
             return simdata;
