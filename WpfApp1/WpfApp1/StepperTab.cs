@@ -24,8 +24,10 @@ namespace WpfApp1
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            connectCCS();
+            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            DeviceManager.RegisterLibrary(null, Path.Combine(path, "Thorlabs.MotionControl.KCube.DCServoUI.DLL"), "KCubeDCServoUI");
             connectKDC();
+            connectCCS();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -36,16 +38,13 @@ namespace WpfApp1
         private void connectKDC()
         {
             Cursor = Cursors.Wait;
-            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            DeviceManager.RegisterLibrary(null, Path.Combine(path, "Thorlabs.MotionControl.KCube.DCServoUI.DLL"), "KCubeDCServoUI");
-
             // get list of devices
             DeviceManagerCLI.BuildDeviceList();
             // tell the device manager the Device Types we are interested in
             List<string> devices = DeviceManagerCLI.GetDeviceList();
             if (devices.Count == 0)
             {
-                MessageBox.Show("No Devices");
+                MessageBox.Show("Motor not found");
                 Cursor = Cursors.Arrow;
                 return;
             }
