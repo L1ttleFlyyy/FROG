@@ -8,7 +8,7 @@ Personal Graduation Project:
 
 Hardware : 
 
-Intel® Atom Z8350(AMD64 4-core@1.44Hz upto 1.8GHz) develop board
+Intel® Atom Z8350(AMD64 4-core@1.44GHz upto 1.8GHz) develop board
 
 Thorlabs® CCS200 (Compact CCD Spectremeter, 200nm~1000nm)
 
