@@ -21,8 +21,6 @@ namespace WpfApp1
 
         private TLCCS ccsSeries;
 
-        bool dataReady = false;
-
         private DispatcherTimer scanTimer = new DispatcherTimer();
 
         private double[] wavelength = new double[3648];
@@ -37,7 +35,7 @@ namespace WpfApp1
         {
             InitializeComponent();
             scanTimer.Tick += new EventHandler(timerScanFun);
-
+            da.AlgorithmFinishedEvent += resultShow;
         }
 
         private Task timerTask1;
@@ -53,6 +51,7 @@ namespace WpfApp1
                     switch (status)
                     {
                         case 1:
+                        case 17:
                             if (timerTask1==null)
                             {
                                 timerTask1 = new Task(GetData);
@@ -68,7 +67,6 @@ namespace WpfApp1
                         case 277:
                         case 21:
                         case 35:
-                        case 17:
                             if (timerTask2 == null)
                             {
                                 timerTask2 = new Task(()=>ccsSeries.startScan());
@@ -102,19 +100,8 @@ namespace WpfApp1
         private void GetData()
         {
             int res = ccsSeries.getScanData(spectrumdata);
-            //simpleData = DataSimplify(spectrumdata);
-            lineGraph1.Dispatcher.BeginInvoke(new Action(()=>lineGraph1.Plot(wavelength, spectrumdata)));
-            //dataReady = true;
+            lineGraph1.Dispatcher.Invoke(new Action(()=>lineGraph1.Plot(wavelength, spectrumdata)));
         }
-
-        //private void UpdateSpectrum(object sender, EventArgs e)
-        //{
-        //    if (dataReady)
-        //    {
-        //        lineGraph1.Plot(simpleWav, simpleData);
-        //        dataReady = false;
-        //    }
-        //}
 
         private void dispose_Button_Click(object sender, RoutedEventArgs e)
         {
@@ -135,7 +122,6 @@ namespace WpfApp1
                 {
                     if (scanTimer.IsEnabled)
                     {
-                        //CompositionTarget.Rendering -= new EventHandler(UpdateSpectrum);
                         scanTimer.Stop();
                     }
                     scan_Button.Background = connect_Button.Background.Clone();
@@ -179,7 +165,6 @@ namespace WpfApp1
                 {
                     string instrumentNumber = "0x8089";
                     string resourceName = "USB0::0x1313::" + instrumentNumber + "::M" + serialNoBox.Text.ToString() + "::RAW";
-                    // initialize device with the resource name (be sure the device is still connected)
                     ccsSeries = new TLCCS(resourceName, false, false);
                     int res = ccsSeries.getWavelengthData((short)0, wavelength, out minWave, out maxWave);
                     simpleWav = DataSimplify(wavelength);
@@ -208,11 +193,9 @@ namespace WpfApp1
                 {
                     scanTimer.Stop();
                     scan_Button.Background = connect_Button.Background.Clone();
-                    //CompositionTarget.Rendering -= new EventHandler(UpdateSpectrum);
                 }
                 else
                 {
-                    //CompositionTarget.Rendering += new EventHandler(UpdateSpectrum);
                     double intTime = double.Parse(intTimeBox.Text);
                     scanTimer.Interval = TimeSpan.FromMilliseconds(1000 * intTime);
                     int res = ccsSeries.setIntegrationTime(intTime);
@@ -239,6 +222,7 @@ namespace WpfApp1
                 + $"Driver: {driver.ToString()}\n"
                 + $"Status: {status.ToString()}";
         }
+
 
         private double[] DataSimplify(double[] data)
         {

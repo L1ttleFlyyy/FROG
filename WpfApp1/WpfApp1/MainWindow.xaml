@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         xmlns:WPF="clr-namespace:InteractiveDataDisplay.WPF;assembly=InteractiveDataDisplay.WPF"
-        mc:Ignorable="d" Height="450" Width="800" Title="FROG" WindowState="Maximized" Closed="Window_Closed" Loaded="Window_Loaded">
+        mc:Ignorable="d" Height="450" Width="800" Title="FROG" WindowState="Maximized" Closed="Window_Closed" Loaded="Window_Loaded" MinWidth="800" MinHeight="300">
     <TabControl TabStripPlacement="Bottom">
         <TabItem Header="Spectrometer" Margin="0,0,0,0" HorizontalAlignment="Left" Width="180" Height="40">
             <DockPanel LastChildFill="True">
@@ -14,16 +14,12 @@
                         <GroupBox x:Name="dock" DockPanel.Dock="Top" Header="General" Height="200">
                             <StackPanel >
                                 <TextBlock TextWrapping="Wrap" Text="Serial No."/>
-
-                                <TextBox x:Name="serialNoBox" Height="16" TextWrapping="Wrap" Text="00419934" HorizontalContentAlignment="Center"/>
+                                <TextBox x:Name="serialNoBox" Height="16" TextWrapping="Wrap" Text="00419934" HorizontalContentAlignment="Center" Margin="5,2"/>
                                 <TextBlock TextWrapping="Wrap" Text="Int Time(s)"/>
-                                <TextBox x:Name="intTimeBox" Height="16" TextWrapping="Wrap" Text="0.1" HorizontalContentAlignment="Center"/>
-                                <Rectangle Fill="#FFF4F4F5" Height="8" Stroke="Black" Visibility="Hidden"/>
-                                <Button x:Name="connect_Button" Content="Connect" Height="30" Click="connect_Button_Click"/>
-                                <Rectangle Fill="#FFF4F4F5" Height="8" Stroke="Black" Visibility="Hidden"/>
-                                <Button x:Name="scan_Button" Content="Start/Stop" Height="30" Click="scan_Button_Click"/>
-                                <Rectangle Fill="#FFF4F4F5" Height="8" Stroke="Black" Visibility="Hidden"/>
-                                <Button x:Name="dispose_Button" Content="Dispose" Height="30" Click="dispose_Button_Click"/>
+                                <TextBox x:Name="intTimeBox" Height="16" TextWrapping="Wrap" Text="0.1" HorizontalContentAlignment="Center" Margin="5,2,5,5"/>
+                                <Button x:Name="connect_Button" Content="Connect" Height="30" Click="connect_Button_Click" Margin="5,0,5,5"/>
+                                <Button x:Name="scan_Button" Content="Start/Stop" Height="30" Click="scan_Button_Click" Margin="5,0,5,5"/>
+                                <Button x:Name="dispose_Button" Content="Dispose" Height="30" Click="dispose_Button_Click" Margin="5,0"/>
 
                             </StackPanel>
                         </GroupBox>
@@ -34,8 +30,8 @@
                     </DockPanel>
                 </GroupBox>
                 <GroupBox DockPanel.Dock="Right" Header="Monitor">
-                    <WPF:Chart x:Name="chart1">
-                        <WPF:LineGraph x:Name="lineGraph1" IsAutoFitEnabled="True" >
+                    <WPF:Chart x:Name="chart1" BottomTitle="λ(nm)">
+                        <WPF:LineGraph x:Name="lineGraph1" IsAutoFitEnabled="True" Stroke="#FF0078D7" >
                         </WPF:LineGraph>
                     </WPF:Chart>
                 </GroupBox>
@@ -54,33 +50,33 @@
                     <ComboBox Name="_devices" SelectionChanged="_devices_OnSelectionChanged"/>
                 </StackPanel>
                 <!--ContentControl which will display the device UserInterface-->
-                <ContentControl Name="_contentControl" Margin="5" Grid.Row="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                <ContentControl Name="_contentControl" Grid.Row="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
             </Grid>
         </TabItem>
         <TabItem HorizontalAlignment="Left" Margin="0,0,0,0" Width="180" Header="Frogger">
             <DockPanel>
-                <GroupBox Header="Controls" Width="300" DockPanel.Dock="Right" HorizontalAlignment="Right">
+                <GroupBox Header="Controls" Width="360" DockPanel.Dock="Right" HorizontalAlignment="Right">
                     <DockPanel>
-                        <GroupBox Height="120" VerticalAlignment="Top" DockPanel.Dock="Bottom">
+                        <GroupBox Height="60" VerticalAlignment="Top" DockPanel.Dock="Bottom">
                             <DockPanel LastChildFill="False">
-                                <Button x:Name="singleButton" Content="Single Scan" Height="105" VerticalAlignment="Center" Width="75" HorizontalAlignment="Center" Click="singleButton_Click"/>
-                                <Button x:Name="continuousButton" Content="Save Data" Height="105" VerticalAlignment="Center" Width="75" HorizontalAlignment="Center" Margin="28,0,0,0" Click="continuousButton_Click"/>
-                                <Button x:Name="forcestopButton" Content="Force Stop" Height="105" VerticalAlignment="Center" Width="75" DockPanel.Dock="Right" Click="forcestopButton_Click"/>
+                                <Button x:Name="singleButton" Content="Single Scan" VerticalAlignment="Center" Width="100" HorizontalAlignment="Center" Click="singleButton_Click" Height="36" Margin="9,0,0,0"/>
+                                <Button x:Name="continuousButton" Content="Continuous Scan" VerticalAlignment="Center" Width="100" HorizontalAlignment="Center" Click="continuousButton_Click" Height="36" Margin="9,0,0,0"/>
+                                <Button x:Name="forcestopButton" Content="Force Stop" Width="100" Click="forcestopButton_Click" Margin="9,0,0,0" VerticalAlignment="Center" Height="36"/>
                             </DockPanel>
                         </GroupBox>
                         <GroupBox Header="Prams" Height="50" VerticalAlignment="Top" DockPanel.Dock="Bottom">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock TextWrapping="Wrap" Text=" From:" VerticalAlignment="Center"/>
-                                <TextBox x:Name="fromBox" TextWrapping="Wrap" Text="1" Width="40" VerticalAlignment="Center" TextAlignment="Center"/>
+                                <TextBox x:Name="fromBox" TextWrapping="Wrap" Text="1" Width="60" VerticalAlignment="Center" TextAlignment="Center"/>
                                 <TextBlock TextWrapping="Wrap" Text="mm To:" VerticalAlignment="Center"/>
-                                <TextBox x:Name="toBox" TextWrapping="Wrap" Text="10" Width="40" VerticalAlignment="Center" TextAlignment="Center"/>
+                                <TextBox x:Name="toBox" TextWrapping="Wrap" Text="10" Width="60" VerticalAlignment="Center" TextAlignment="Center"/>
                                 <TextBlock TextWrapping="Wrap" Text="mm Step:" VerticalAlignment="Center"/>
-                                <TextBox x:Name="stepBox" TextWrapping="Wrap" Text="1" Width="40" VerticalAlignment="Center" TextAlignment="Center"/>
+                                <TextBox x:Name="stepBox" TextWrapping="Wrap" Text="1" Width="60" VerticalAlignment="Center" TextAlignment="Center"/>
                                 <TextBlock TextWrapping="Wrap" Text="mm" VerticalAlignment="Center"/>
                             </StackPanel>
                         </GroupBox>
-                        <WPF:Chart DockPanel.Dock="Top">
-                            <WPF:LineGraph x:Name="lineGraph2"/>
+                        <WPF:Chart DockPanel.Dock="Top" BottomTitle="t(fs)">
+                            <WPF:LineGraph x:Name="lineGraph2" Stroke="#FF0078D7"/>
                         </WPF:Chart>
                     </DockPanel>
                 </GroupBox>
@@ -88,11 +84,55 @@
                     <TextBox x:Name="infoTextBox" TextWrapping="Wrap" Text="Status Information"/>
                 </GroupBox>
                 <GroupBox Header="Graph" DockPanel.Dock="Top">
-                    <WPF:Chart>
+                    <WPF:Chart BottomTitle="Traveling Distance(mm)" LeftTitle="λ(nm)">
                         <WPF:HeatmapGraph x:Name="heatMap1"/>
                     </WPF:Chart>
                 </GroupBox>
             </DockPanel>
+        </TabItem>
+        <TabItem Margin="0,0,0,0" Width="180" Header="Data Analyzer" HorizontalAlignment="Left">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="187*"/>
+                    <RowDefinition Height="187*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="300*"/>
+                    <ColumnDefinition Width="300*"/>
+                    <ColumnDefinition Width="200"/>
+                </Grid.ColumnDefinitions>
+                <WPF:Chart BottomTitle="t(fs)">
+                    <WPF:LineGraph x:Name="EtAmpGraph" Stroke="#FF0078D7" StrokeThickness="2"/>
+                </WPF:Chart>
+                <WPF:Chart Grid.Column="1" BottomTitle="f(PHz)">
+                    <WPF:LineGraph x:Name="TEAmpGraph" Stroke="#FFCF8731" StrokeThickness="2"/>
+                </WPF:Chart>
+                <WPF:Chart Grid.Row="1" BottomTitle="t(fs)">
+                    <WPF:LineGraph x:Name="EtPhaGraph" Stroke="#FF0078D7" StrokeThickness="2"/>
+                </WPF:Chart>
+                <WPF:Chart Grid.Column="1" Grid.Row="1" BottomTitle="f(PHz)">
+                    <WPF:LineGraph x:Name="TEPhaGraph" Stroke="#FFCF8731" StrokeThickness="2"/>
+                </WPF:Chart>
+                <GroupBox Grid.Column="2" Grid.RowSpan="2">
+                    <DockPanel>
+                        <Button x:Name="calculateButton" Content="Calculate" VerticalAlignment="Bottom" Width="100" HorizontalAlignment="Center" DockPanel.Dock="Bottom" Margin="0,0,0,5"/>
+                        <Button x:Name="selectFileButton" Content="Select File" VerticalAlignment="Bottom" Width="100" DockPanel.Dock="Bottom" HorizontalAlignment="Center" Background="#FFDDDDDD" Margin="0,0,0,5" Click="selectFileButton_Click"/>
+                        <Grid Width="180" Height="30" DockPanel.Dock="Bottom" Margin="0,0,0,5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="90*"/>
+                                <ColumnDefinition Width="90*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock TextWrapping="Wrap" Text="Timeout(s):" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            <TextBox x:Name="timeoutTextBox" Grid.Column="1" TextWrapping="Wrap" Text="30" HorizontalAlignment="Left" VerticalAlignment="Center" Width="64" TextAlignment="Center"/>
+                        </Grid>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <TextBlock x:Name="outputTextBlock" DockPanel.Dock="Bottom" Margin="5" Background="#FFE8E8E8" FontSize="20" TextWrapping="WrapWithOverflow" TextAlignment="Center"/>
+                        </ScrollViewer>
+                    </DockPanel>
+
+                </GroupBox>
+
+            </Grid>
         </TabItem>
     </TabControl>
 </Window>

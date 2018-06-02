@@ -24,7 +24,8 @@ namespace WpfApp1
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            //string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string path = Directory.GetCurrentDirectory();
             DeviceManager.RegisterLibrary(null, Path.Combine(path, "Thorlabs.MotionControl.KCube.DCServoUI.DLL"), "KCubeDCServoUI");
             connectKDC();
             connectCCS();
@@ -37,27 +38,32 @@ namespace WpfApp1
 
         private void connectKDC()
         {
-            Cursor = Cursors.Wait;
-            // get list of devices
-            DeviceManagerCLI.BuildDeviceList();
-            // tell the device manager the Device Types we are interested in
-            List<string> devices = DeviceManagerCLI.GetDeviceList();
-            if (devices.Count == 0)
+            try
             {
-                MessageBox.Show("Motor not found");
+                Cursor = Cursors.Wait;
+                // get list of devices
+                DeviceManagerCLI.BuildDeviceList();
+                // tell the device manager the Device Types we are interested in
+                List<string> devices = DeviceManagerCLI.GetDeviceList();
+                if (devices.Count == 0)
+                {
+                    MessageBox.Show("Motor not found");
+                    Cursor = Cursors.Arrow;
+                    return;
+                }
+                // populate the combo box
+                _devices.ItemsSource = devices;
+                _devices.SelectedIndex = 0;
+                // get first serial number for example
+                motorNO = devices[0];
+                // create the device
+                ConnectDevice(motorNO);
                 Cursor = Cursors.Arrow;
-                return;
             }
-
-            // populate the combo box
-            _devices.ItemsSource = devices;
-            _devices.SelectedIndex = 0;
-
-            // get first serial number for example
-            motorNO = devices[0];
-            // create the device
-            ConnectDevice(motorNO);
-            Cursor = Cursors.Arrow;
+            catch(Exception err)
+            {
+                MessageBox.Show(err.Message);
+            }
         }
 
         private void _devices_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
