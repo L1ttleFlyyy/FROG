@@ -55,9 +55,9 @@
         </TabItem>
         <TabItem HorizontalAlignment="Left" Margin="0,0,0,0" Width="180" Header="Frogger">
             <DockPanel>
-                <GroupBox Header="Controls" Width="360" DockPanel.Dock="Right" HorizontalAlignment="Right">
+                <GroupBox Width="360" DockPanel.Dock="Right" HorizontalAlignment="Right">
                     <DockPanel>
-                        <GroupBox Height="60" VerticalAlignment="Top" DockPanel.Dock="Bottom">
+                        <GroupBox Header="Controls" Height="70" VerticalAlignment="Top" DockPanel.Dock="Bottom">
                             <DockPanel LastChildFill="False">
                                 <Button x:Name="singleButton" Content="Single Scan" VerticalAlignment="Center" Width="100" HorizontalAlignment="Center" Click="singleButton_Click" Height="36" Margin="9,0,0,0"/>
                                 <Button x:Name="continuousButton" Content="Continuous Scan" VerticalAlignment="Center" Width="100" HorizontalAlignment="Center" Click="continuousButton_Click" Height="36" Margin="9,0,0,0"/>
@@ -81,7 +81,9 @@
                     </DockPanel>
                 </GroupBox>
                 <GroupBox Header="Info" Height="150" VerticalAlignment="Bottom"  DockPanel.Dock="Bottom">
-                    <TextBox x:Name="infoTextBox" TextWrapping="Wrap" Text="Status Information"/>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Foreground="Black">
+                        <TextBox x:Name="infoTextBox" TextWrapping="Wrap" Text="Status Information"/>
+                    </ScrollViewer>
                 </GroupBox>
                 <GroupBox Header="Graph" DockPanel.Dock="Top">
                     <WPF:Chart BottomTitle="Traveling Distance(mm)" LeftTitle="λ(nm)">
@@ -101,16 +103,16 @@
                     <ColumnDefinition Width="300*"/>
                     <ColumnDefinition Width="200"/>
                 </Grid.ColumnDefinitions>
-                <WPF:Chart BottomTitle="t(fs)">
+                <WPF:Chart LeftTitle="Normalized Intensity" BottomTitle="t(fs)">
                     <WPF:LineGraph x:Name="EtAmpGraph" Stroke="#FF0078D7" StrokeThickness="2"/>
                 </WPF:Chart>
-                <WPF:Chart Grid.Column="1" BottomTitle="f(PHz)">
+                <WPF:Chart Grid.Column="1" LeftTitle="Normalized Intensity" BottomTitle="f(PHz)">
                     <WPF:LineGraph x:Name="TEAmpGraph" Stroke="#FFCF8731" StrokeThickness="2"/>
                 </WPF:Chart>
-                <WPF:Chart Grid.Row="1" BottomTitle="t(fs)">
+                <WPF:Chart Grid.Row="1" LeftTitle="Phase(rad)" BottomTitle="t(fs)">
                     <WPF:LineGraph x:Name="EtPhaGraph" Stroke="#FF0078D7" StrokeThickness="2"/>
                 </WPF:Chart>
-                <WPF:Chart Grid.Column="1" Grid.Row="1" BottomTitle="f(PHz)">
+                <WPF:Chart Grid.Column="1" Grid.Row="1" LeftTitle="Phase(rad)" BottomTitle="f(PHz)">
                     <WPF:LineGraph x:Name="TEPhaGraph" Stroke="#FFCF8731" StrokeThickness="2"/>
                 </WPF:Chart>
                 <GroupBox Grid.Column="2" Grid.RowSpan="2">
@@ -123,11 +125,13 @@
                                 <ColumnDefinition Width="90*"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock TextWrapping="Wrap" Text="Timeout(s):" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                            <TextBox x:Name="timeoutTextBox" Grid.Column="1" TextWrapping="Wrap" Text="30" HorizontalAlignment="Left" VerticalAlignment="Center" Width="64" TextAlignment="Center"/>
+                            <TextBox x:Name="timeoutTextBox" Grid.Column="1" TextWrapping="Wrap" Text="20" HorizontalAlignment="Left" VerticalAlignment="Center" Width="64" TextAlignment="Center"/>
                         </Grid>
-                        <ScrollViewer VerticalScrollBarVisibility="Auto">
-                            <TextBlock x:Name="outputTextBlock" DockPanel.Dock="Bottom" Margin="5" Background="#FFE8E8E8" FontSize="20" TextWrapping="WrapWithOverflow" TextAlignment="Center"/>
-                        </ScrollViewer>
+                        <Border BorderBrush="Black" BorderThickness="1">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" Foreground="Black">
+                                <TextBlock x:Name="outputTextBlock" DockPanel.Dock="Bottom" Margin="5" FontSize="20" TextWrapping="WrapWithOverflow" TextAlignment="Center" Foreground="Black"/>
+                            </ScrollViewer>
+                        </Border>
                     </DockPanel>
 
                 </GroupBox>

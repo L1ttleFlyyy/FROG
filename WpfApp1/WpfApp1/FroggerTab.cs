@@ -15,7 +15,7 @@ namespace WpfApp1
 
         private Task getFrogTraceTask;
 
-        private Task saveToFileTask;
+        //private Task saveToFileTask;
 
         private void PlotHeatMap()
         {
@@ -45,18 +45,20 @@ namespace WpfApp1
                 if (scanTimer.IsEnabled)
                 {
                     scanTimer.Stop();
-                    scan_Button.Dispatcher.BeginInvoke(new Action(() => { scan_Button.Background = connect_Button.Background.Clone(); }));
-
+                    //scan_Button.Dispatcher.BeginInvoke(new Action(() => { scan_Button.Background = connect_Button.Background.Clone(); }));
+                    scan_Button.Background = connect_Button.Background.Clone();
                 }
 
                 if (getFrogTraceTask == null)
                 {
+                    da.TimeLimit = int.Parse(timeoutTextBox.Text);
                     getFrogTraceTask = new Task(getFrogTrace);
                     getFrogTraceTask.Start();
                     UpdateInfoBox("Scanning");
                 }
                 else if (getFrogTraceTask.IsCompleted)
                 {
+                    da.TimeLimit = int.Parse(timeoutTextBox.Text);
                     getFrogTraceTask = new Task(getFrogTrace);
                     getFrogTraceTask.Start();
                     UpdateInfoBox("Scanning");
@@ -76,23 +78,50 @@ namespace WpfApp1
 
         }
 
+        private Task continuousTask;
+
         private void continuousButton_Click(object sender, RoutedEventArgs e)
         {
             //TODO: continuous scan
             try
             {
-                if (saveToFileTask == null)
+                if (KDC101 == null || ccsSeries == null)
                 {
-                    saveToFileTask = new Task(DataToTxt);
-                    saveToFileTask.Start();
+                    MessageBox.Show("Spectrometer or Motor not connected");
+                    return;
                 }
-                else if (saveToFileTask.IsCompleted)
+
+                startposition = double.Parse(fromBox.Text);
+                stopposition = double.Parse(toBox.Text);
+                interval = double.Parse(stepBox.Text);
+                ccsSeries.getIntegrationTime(out inttime_frog);
+
+                // reset Spectrometer Tab
+                if (scanTimer.IsEnabled)
                 {
-                    saveToFileTask = new Task(DataToTxt);
-                    saveToFileTask.Start();
+                    scanTimer.Stop();
+                    //scan_Button.Dispatcher.BeginInvoke(new Action(() => { scan_Button.Background = connect_Button.Background.Clone(); }));
+                    scan_Button.Background = connect_Button.Background.Clone();
+                }
+
+                if (continuousTask == null)
+                {
+                    da.TimeLimit = int.Parse(timeoutTextBox.Text);
+                    continuousTask = new Task(continuousScan);
+                    continuousTask.Start();
+                    UpdateInfoBox("Continuous scan started");
+                }
+                else if (continuousTask.IsCompleted)
+                {
+                    da.TimeLimit = int.Parse(timeoutTextBox.Text);
+                    continuousTask = new Task(continuousScan);
+                    continuousTask.Start();
+                    UpdateInfoBox("Continuous scan started");
                 }
                 else
-                    MessageBox.Show("Saving in progress");
+                {
+                    MessageBox.Show("Continuous scan in process");
+                }
             }
             catch (Exception err)
             {
@@ -118,17 +147,21 @@ namespace WpfApp1
             //TODO: force stop
             try
             {
-                if (getFrogTraceTask != null)
+                if (!forcestop)
                 {
-                    if (!getFrogTraceTask.IsCompleted)
-                    {
-                        if (!forcestop)
-                        {
-                            forcestop = true;
-                            getFrogTraceTask.Wait();
-                            _taskID = KDC101.MoveTo(0m, CommandCompleteFunction);
-                        }
-                    }
+                    forcestop = true;
+                }
+                else
+                {
+                    MessageBox.Show("Program is trying to stop!");
+                }
+                if(!stopcontinuous)
+                {
+                    stopcontinuous = true;
+                }
+                else
+                {
+                    MessageBox.Show("Program is trying to stop!");
                 }
             }
             catch (Exception err)
@@ -138,9 +171,6 @@ namespace WpfApp1
         }
 
         private string motorNO = "27501200";
-
-
-        //private int pollingTime = 250;
 
         private double[,] FrogTrace;
 
@@ -152,18 +182,20 @@ namespace WpfApp1
         private double inttime_frog;
 
         private bool forcestop = false;
+        private bool stopcontinuous = false;
 
         private void getFrogTrace()
         {
-
-            int nsteps = (int)Math.Floor((stopposition - startposition) / interval) + 1;
+            double starttemp = startposition;
+            double stoptemp = stopposition;
+            int nsteps = (int)Math.Floor((stoptemp - starttemp) / interval) + 1;
 
             tau = new double[nsteps + 1];
             FrogTrace = new double[nsteps, 3647];
 
             for (int i = 0; i < nsteps + 1; i++)
             {
-                tau[i] = startposition + (i - 0.5) * interval;
+                tau[i] = starttemp + (i - 0.5) * interval;
             }
 
             bool direction = KDC101.Position < (decimal)tau[nsteps / 2];
@@ -178,7 +210,7 @@ namespace WpfApp1
 
                 if (direction)
                 {
-                    KDC101.MoveTo((decimal)startposition, 10000);
+                    KDC101.MoveTo((decimal)starttemp, 10000);
                     ccsSeries.getDeviceStatus(out int status);
                     if (status == 17 || status == 1)
                     { ccsSeries.getScanData(spectrumdata); }
@@ -204,11 +236,11 @@ namespace WpfApp1
                         FrogTrace[i, j] = spectrumdata[j];
                     }
 
-                    startposition += interval;
+                    starttemp += interval;
                 }
                 else
                 {
-                    KDC101.MoveTo((decimal)stopposition, 10000);
+                    KDC101.MoveTo((decimal)stoptemp, 10000);
                     ccsSeries.getDeviceStatus(out int status);
                     if (status == 17 || status == 1)
                     { ccsSeries.getScanData(spectrumdata); }
@@ -232,19 +264,29 @@ namespace WpfApp1
                     {
                         FrogTrace[nsteps - i - 1, j] = spectrumdata[j];
                     }
-                    stopposition -= interval;
+                    stoptemp -= interval;
                 }
-                heatMap1.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(PlotHeatMap));
+                heatMap1.Dispatcher.Invoke(DispatcherPriority.Loaded, new Action(PlotHeatMap));
             }
             UpdateInfoBox("Trace Scan Finished");
+            da.RunAlgorithmAsync(DataToTxt()).Wait();
+            if (da.ResultCount > 0)
+            {
+                da.GetResult(out double duration, out double spectralwidth, out double[][] result);
+                Dispatcher.Invoke(new Action(() =>
+                {
+                    lineGraph2.Plot(result[2], result[0]);
+                }));
+                UpdateInfoBox($"Pulse duration: {duration} fs");
+                UpdateInfoBox($"Spectral width: {spectralwidth} nm");
+            }
         }
 
-        private void DataToTxt()
+        private string DataToTxt()
         {
             if (FrogTrace == null)
             {
-                MessageBox.Show("Data not availiable");
-                return;
+                return null;
             }
 
             int M = FrogTrace.GetLength(0);
@@ -259,7 +301,7 @@ namespace WpfApp1
                 {
                     if (i != M - 1)
                     {
-                        sb1.Append(FrogTrace[i, j].ToString("G4"));
+                        sb1.Append(FrogTrace[i, j].ToString("G4") + " ");
                     }
                     else
                     {
@@ -285,15 +327,15 @@ namespace WpfApp1
             string second = currentTime.Second.ToString();
 
             //var crp = Directory.GetCurrentDirectory();
-            string path1 = $"./{day}_{hour}_{minute}_{second}_FROG.txt";
-            string path2 = $"./{day}_{hour}_{minute}_{second}_Tau.txt";
-            string path3 = $"./{day}_{hour}_{minute}_{second}_wavelenth.txt";
+            string frog_data_id = $"{day}_{hour}_{minute}_{second}_";
+            string path1 = $"../data/" + frog_data_id + "FROG.txt";
+            string path2 = $"../data/" + frog_data_id + "Tau.txt";
+            string path3 = $"../data/" + frog_data_id + "wavelenth.txt";
 
             using (StreamWriter sw = new StreamWriter(path1))
             {
                 sw.Write(sb1.ToString());
             }
-
 
             using (StreamWriter sw = new StreamWriter(path2))
             {
@@ -306,6 +348,31 @@ namespace WpfApp1
             }
             //infoTextBox.Dispatcher.BeginInvoke(new Action(()=> { infoTextBox.Text = "Frog Trace saved\n" + infoTextBox.Text; }));
             UpdateInfoBox("Frog Trace Saved");
+            return frog_data_id;
+        }
+
+        private void continuousScan()
+        {
+            if (getFrogTraceTask != null)
+            {
+                if (!getFrogTraceTask.IsCompleted)
+                {
+                    getFrogTraceTask.Wait();
+                }
+                while (!stopcontinuous)
+                {
+                    getFrogTrace();
+                }
+                stopcontinuous = false;
+            }
+            else
+            {
+                while (!stopcontinuous)
+                {
+                    getFrogTrace();
+                }
+                stopcontinuous = false;
+            }
         }
 
         private void UpdateInfoBox(string str)
@@ -313,7 +380,7 @@ namespace WpfApp1
             string currentTime = DateTime.Now.ToString();
             infoTextBox.Dispatcher.BeginInvoke(new Action(() =>
             {
-                infoTextBox.Text = currentTime+ " " + str + "\n" + infoTextBox.Text;
+                infoTextBox.Text = currentTime + " " + str + "\n" + infoTextBox.Text;
             }));
         }
 

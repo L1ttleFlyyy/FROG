@@ -35,7 +35,7 @@ namespace WpfApp1
         {
             InitializeComponent();
             scanTimer.Tick += new EventHandler(timerScanFun);
-            da.AlgorithmFinishedEvent += resultShow;
+            db.AlgorithmFinishedEvent += resultShow;
         }
 
         private Task timerTask1;
@@ -51,7 +51,6 @@ namespace WpfApp1
                     switch (status)
                     {
                         case 1:
-                        case 17:
                             if (timerTask1==null)
                             {
                                 timerTask1 = new Task(GetData);
@@ -63,6 +62,7 @@ namespace WpfApp1
                                 timerTask1.Start();
                             }
                             break;
+                        case 17:
                         case 5:
                         case 277:
                         case 21:
@@ -134,8 +134,6 @@ namespace WpfApp1
                 MessageBox.Show("No CCS connected!");
             }
         }
-
-
 
         private void connect_Button_Click(object sender, RoutedEventArgs e)
         {

@@ -4,8 +4,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace FROG.DataAnalysis
 {
@@ -14,6 +16,25 @@ namespace FROG.DataAnalysis
         //Work Directory which contains "DataAnalysis", "data" and "Debug"
         private static string wd = Path.GetDirectoryName(Directory.GetCurrentDirectory());
         //private const string wd = @"C:\Users\WinDev\source\repos\";
+        private int _timeout = 20;
+
+        public int TimeLimit
+        {
+            get
+            {
+                if (_timeout < 1)
+                {
+                    return int.MaxValue;
+                }
+                else
+                    return _timeout;
+            }
+            set
+            {
+                _timeout = value;
+            }
+        }
+
         private static ProcessStartInfo _startinfo = new ProcessStartInfo
         {
             FileName = wd + @"\DataAnalysis\DataAnalysis.exe",
@@ -68,7 +89,7 @@ namespace FROG.DataAnalysis
             }
         }
 
-        public async void RunAlgorithmAsync(string str)
+        public async Task RunAlgorithmAsync(string str)
         {
             await AlgorithmKernel(str);
         }
@@ -88,27 +109,56 @@ namespace FROG.DataAnalysis
         private async Task AlgorithmKernel(string str)
         {
             _startinfo.Arguments = str;
+            bool canceltask = false;
             await Task.Run(new Action(() =>
             {
                 string rst;
+                bool istimeout = false;
                 try
                 {
-                    using (Process _exe = new Process())
+                    Process _exe = new Process
                     {
-                        _exe.StartInfo = _startinfo;
-                        _exe.Start();
-                        rst = _exe.StandardOutput.ReadToEnd();
+                        StartInfo = _startinfo
+                    };
+                    _exe.Start();
+                    Task.Run(new Action(() =>
+                    {
+                        Thread.Sleep(1000 * TimeLimit);
+                        if (!canceltask && _exe != null)
+                        {
+                            if (!_exe.HasExited)
+                            {
+                                istimeout = true;
+                                _exe.Kill();
+                                _exe.Close();
+                            }
+
+                        }
+
+                    }));
+                    rst = _exe.StandardOutput.ReadToEnd();
+                    if (!istimeout)
+                    {
+                        canceltask = true;
                         _exe.WaitForExit();
                         _exe.Close();
+                        ReadResultData(wd + @"\data\" + str + "result.txt", ref _resultDataBuffer);
+                        string[] output_List = rst.Split(new char[] { '\n' });
+                        _resultDurationBuffer.Enqueue(double.Parse(output_List[0]));
+                        _resultWaveBuffer.Enqueue(double.Parse(output_List[1]));
                     }
-                    ReadResultData(wd + @"\data\" + str + "result.txt", ref _resultDataBuffer);
-                    string[] output_List = rst.Split(new char[] { '\n' });
-                    _resultDurationBuffer.Enqueue(double.Parse(output_List[0]));
-                    _resultWaveBuffer.Enqueue(double.Parse(output_List[1]));
+                    else
+                    {
+                        throw new TimeoutException("Calculation time out");
+                    }
+                }
+                catch (TimeoutException toerr)
+                {
+                    MessageBox.Show(toerr.Message);
                 }
                 catch (Exception err)
                 {
-                    MessageBox.Show(err.Message);
+                    MessageBox.Show("Calculation failed");
                 }
                 return;
             }));
@@ -146,5 +196,6 @@ namespace FROG.DataAnalysis
             tempList.Add(double.Parse(tempString));
             return tempList.ToArray();
         }
+
     }
 }
